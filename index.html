@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>المصحف الشريف &mdash; رواية ورش عن نافع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Scheherazade+New:wght@400;700&family=Lateef&family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#f8f2e2;
+    --parchment-deep:#efe4c8;
+    --ink:#22301f;
+    --ink-soft:#4a5744;
+    --emerald:#0f3d34;
+    --emerald-deep:#0a2b25;
+    --gold:#b3873e;
+    --gold-soft:#d9b876;
+    --gold-line:#d8c390;
+    --card:#fffdf6;
+    --shadow: 0 8px 30px rgba(15,61,52,.12);
+    --reader-font: 'Amiri Quran', 'Scheherazade New', serif;
+    --reader-size: 30px;
+    --radius: 14px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Tajawal','Cairo',sans-serif;
+    background:
+      radial-gradient(1200px 700px at 85% -10%, rgba(179,135,62,.10), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(15,61,52,.10), transparent 55%),
+      var(--parchment);
+    color:var(--ink);
+    min-height:100%;
+  }
+
+  /* subtle geometric border pattern used as decorative rule */
+  .mesh-rule{
+    height:10px;
+    background-image: linear-gradient(135deg, var(--gold) 25%, transparent 25%),
+                       linear-gradient(225deg, var(--gold) 25%, transparent 25%),
+                       linear-gradient(45deg, var(--gold) 25%, transparent 25%),
+                       linear-gradient(315deg, var(--gold) 25%, transparent 25%);
+    background-position: 10px 0, 10px 0, 0 0, 0 0;
+    background-size: 20px 20px;
+    background-repeat: repeat-x;
+    opacity:.55;
+  }
+
+  header.top{
+    position:sticky; top:0; z-index:40;
+    background: linear-gradient(180deg, var(--emerald) 0%, var(--emerald-deep) 100%);
+    color:#f6ead0;
+    box-shadow: var(--shadow);
+  }
+  .top-inner{
+    max-width:1300px; margin:0 auto;
+    padding:14px 20px 10px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:14px 22px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    margin-inline-end:auto;
+  }
+  .brand .roundel{
+    width:42px;height:42px;border-radius:50%;
+    border:2px solid var(--gold-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Amiri Quran',serif; font-size:20px; color:var(--gold-soft);
+    background:rgba(0,0,0,.15);
+    flex:none;
+  }
+  .brand h1{
+    margin:0; font-size:19px; font-weight:800; letter-spacing:.3px;
+    color:#faf1dc;
+  }
+  .brand p{margin:1px 0 0; font-size:12px; color:#c9d6c8; font-weight:400;}
+
+  .toolbar{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .tool-group{
+    display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    padding:5px 8px; border-radius:10px;
+  }
+  .tool-group label{font-size:11.5px; color:#d8e2d3; white-space:nowrap;}
+  select.tool-select{
+    background:transparent; color:#f8f1de; border:none; font-size:13px;
+    font-family:inherit; cursor:pointer; outline:none;
+  }
+  select.tool-select option{color:#1c1c1c;}
+  .step-btn{
+    width:26px;height:26px;border-radius:7px;border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08); color:#fbeed3; cursor:pointer; font-size:15px;
+    line-height:1; display:flex;align-items:center;justify-content:center;
+  }
+  .step-btn:hover{background:rgba(255,255,255,.18);}
+  .search-wrap{position:relative; flex:1 1 240px; max-width:340px;}
+  .search-wrap input{
+    width:100%; padding:8px 34px 8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.94); color:#20291d; font-family:inherit; font-size:13.5px; outline:none;
+  }
+  .search-wrap svg{position:absolute; inset-inline-end:10px; top:50%; transform:translateY(-50%); opacity:.55;}
+  .search-results{
+    position:absolute; top:calc(100% + 6px); right:0; left:0;
+    background:var(--card); border:1px solid var(--gold-line); border-radius:12px;
+    max-height:360px; overflow:auto; box-shadow:var(--shadow); z-index:60; display:none;
+  }
+  .search-results.show{display:block;}
+  .search-results .sr-item{
+    padding:10px 14px; border-bottom:1px solid #eee2c4; cursor:pointer; color:var(--ink);
+  }
+  .search-results .sr-item:hover{background:var(--parchment-deep);}
+  .search-results .sr-item b{color:var(--emerald); font-weight:800;}
+  .search-results .sr-meta{font-size:11px; color:var(--ink-soft); margin-top:3px;}
+  .search-empty{padding:14px; font-size:13px; color:var(--ink-soft); text-align:center;}
+
+  .layout{
+    max-width:1300px; margin:0 auto;
+    display:grid; grid-template-columns: 300px 1fr; gap:22px;
+    padding:22px 20px 60px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .layout{grid-template-columns:1fr; padding:14px;}
+    .sidebar{order:2;}
+    .reader-wrap{order:1;}
+  }
+
+  .sidebar{
+    position:sticky; top:96px;
+    background:var(--card);
+    border:1px solid var(--gold-line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    max-height:calc(100vh - 116px);
+    display:flex; flex-direction:column;
+  }
+  @media (max-width:880px){ .sidebar{position:static; max-height:none;} }
+
+  .tabs{display:flex; border-bottom:1px solid var(--gold-line);}
+  .tabs button{
+    flex:1; padding:12px 8px; background:none; border:none; cursor:pointer;
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:14px; color:var(--ink-soft);
+    border-bottom:3px solid transparent;
+  }
+  .tabs button.active{color:var(--emerald); border-bottom-color:var(--gold);}
+
+  .list-filter{padding:10px 12px; border-bottom:1px solid #efe6c9;}
+  .list-filter input{
+    width:100%; padding:7px 10px; border-radius:8px; border:1px solid var(--gold-line);
+    font-family:inherit; font-size:13px; outline:none; background:#fffef9;
+  }
+
+  .list{overflow-y:auto; padding:6px 0;}
+  .surah-item{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 14px; cursor:pointer; border-inline-start:3px solid transparent;
+  }
+  .surah-item:hover{background:var(--parchment-deep);}
+  .surah-item.active{background:#eadfba55; border-inline-start-color:var(--gold);}
+  .s-num{
+    flex:none; width:30px;height:30px;border-radius:50%;
+    border:1.5px solid var(--gold); color:var(--emerald); font-size:12px; font-weight:800;
+    display:flex;align-items:center;justify-content:center; background:#fff;
+  }
+  .s-name{font-weight:700; font-size:15px; color:var(--ink);}
+  .s-meta{font-size:11px; color:var(--ink-soft); margin-inline-start:auto; text-align:left;}
+
+  .juz-item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px; cursor:pointer; border-inline-start:3px solid transparent;
+  }
+  .juz-item:hover{background:var(--parchment-deep);}
+  .juz-item.active{background:#eadfba55; border-inline-start-color:var(--gold);}
+  .j-badge{
+    flex:none; width:34px;height:34px;border-radius:9px; background:var(--emerald); color:#f7ecd0;
+    display:flex;align-items:center;justify-content:center; font-weight:800; font-size:13px;
+  }
+  .j-label{font-size:14px; font-weight:600; color:var(--ink);}
+
+  .reader-wrap{min-height:70vh;}
+  .surah-card{
+    background:var(--card); border:1px solid var(--gold-line); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .surah-head{
+    background:linear-gradient(135deg, var(--emerald) 0%, #164a3f 100%);
+    color:#f8efd6; padding:22px 24px; text-align:center; position:relative;
+  }
+  .surah-head h2{margin:0; font-family:'Amiri Quran',serif; font-size:30px; letter-spacing:1px;}
+  .surah-head .sub{margin-top:6px; font-size:12.5px; color:#d8e6d2; display:flex; justify-content:center; gap:14px; flex-wrap:wrap;}
+  .play-fab{
+    position:absolute; inset-inline-end:18px; top:18px;
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,.12); border:1px solid var(--gold-soft);
+    color:#faf1dc; padding:8px 14px; border-radius:30px; cursor:pointer; font-size:13px; font-family:inherit;
+  }
+  .play-fab:hover{background:rgba(255,255,255,.22);}
+  .bismillah{
+    text-align:center; padding:20px 10px 6px; font-family:var(--reader-font);
+    font-size:calc(var(--reader-size) * 0.85); color:var(--emerald);
+  }
+  .juz-title{
+    text-align:center; padding:16px 10px 4px; font-family:'Cairo',sans-serif;
+    font-weight:800; color:var(--emerald); font-size:15px;
+  }
+  .ayat-block{
+    padding:8px 30px 34px;
+    font-family:var(--reader-font);
+    font-size:var(--reader-size);
+    line-height:2.35;
+    color:var(--ink);
+    text-align:justify;
+    direction:rtl;
+  }
+  @media (max-width:600px){ .ayat-block{padding:8px 16px 26px;} }
+  .ayah{transition:background .3s;}
+  .ayah.hilite{background:#f3dfa6aa; border-radius:6px;}
+  .ayah-num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:1.05em; height:1.05em; margin:0 4px;
+    font-family:'Cairo',sans-serif; font-size:.34em; font-weight:800;
+    color:var(--emerald); border:1.4px solid var(--gold); border-radius:50%;
+    transform:translateY(-2px);
+    padding:.6em;
+  }
+  .surah-nav{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 22px 24px; border-top:1px dashed var(--gold-line);
+  }
+  .nav-btn{
+    display:flex; align-items:center; gap:6px;
+    background:var(--parchment-deep); border:1px solid var(--gold-line); color:var(--emerald);
+    padding:8px 14px; border-radius:9px; cursor:pointer; font-family:'Cairo',sans-serif; font-weight:700; font-size:13px;
+  }
+  .nav-btn:hover{background:var(--gold-soft); color:#22301f;}
+  .nav-btn[disabled]{opacity:.35; cursor:default;}
+
+  .juz-list-inner .surah-mini-head{
+    text-align:center; padding:14px 10px 2px; color:var(--gold); font-family:'Amiri Quran',serif; font-size:21px;
+    border-top:1px dashed var(--gold-line); margin-top:10px;
+  }
+
+  .loading, .placeholder{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; padding:80px 20px; color:var(--ink-soft); text-align:center;
+  }
+  .spinner{
+    width:36px;height:36px;border-radius:50%;
+    border:3px solid var(--gold-line); border-top-color:var(--gold);
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  footer.credits{
+    max-width:1300px; margin:0 auto; padding:10px 24px 40px; color:var(--ink-soft); font-size:11.5px; text-align:center;
+    line-height:1.9;
+  }
+  footer.credits a{color:var(--emerald);}
+
+  /* audio bar */
+  #audioBar{
+    position:fixed; bottom:0; inset-inline:0; z-index:80;
+    background:var(--emerald-deep); color:#f5ead2;
+    display:flex; align-items:center; gap:14px; padding:10px 20px;
+    box-shadow:0 -6px 22px rgba(0,0,0,.25);
+    transform:translateY(120%); transition:transform .35s ease;
+  }
+  #audioBar.show{transform:translateY(0);}
+  #audioBar .ab-title{font-size:13px; font-weight:700; white-space:nowrap;}
+  #audioBar audio{flex:1; height:34px;}
+  #audioBar .ab-close{
+    background:none;border:none;color:#f5ead2;font-size:20px;cursor:pointer; line-height:1;
+  }
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--gold-line); border-radius:4px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="roundel">ق</div>
+      <div>
+        <h1>المصحف الشريف &mdash; رواية ورش عن نافع</h1>
+        <p>نص برواية ورش عن طريق الأزرق &middot; إصدار مجمّع الملك فهد لطباعة المصحف الشريف</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tool-group">
+        <label>الخط</label>
+        <select id="fontSelect" class="tool-select">
+          <option value="'Amiri Quran', serif">أميري قرآن</option>
+          <option value="'Scheherazade New', serif">شهرزاد</option>
+          <option value="'Lateef', serif">لطيف</option>
+        </select>
+      </div>
+      <div class="tool-group">
+        <label>حجم الخط</label>
+        <button class="step-btn" id="decFont">−</button>
+        <button class="step-btn" id="incFont">+</button>
+      </div>
+      <div class="search-wrap">
+        <input id="searchInput" type="text" placeholder="ابحث في القرآن الكريم…">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#20291d" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+  </div>
+  <div class="mesh-rule"></div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="tabs">
+      <button id="tabSurah" class="active">فهرس السور</button>
+      <button id="tabJuz">فهرس الأجزاء</button>
+    </div>
+    <div class="list-filter">
+      <input id="surahFilter" type="text" placeholder="ابحث عن اسم سورة أو رقمها…">
+    </div>
+    <div id="surahListEl" class="list"></div>
+    <div id="juzListEl" class="list" hidden></div>
+  </aside>
+
+  <main class="reader-wrap">
+    <div id="reader">
+      <div class="placeholder">
+        <div class="spinner"></div>
+        <p>جارٍ تحميل نص المصحف الشريف برواية ورش عن نافع…</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="credits">
+  النص القرآني برواية ورش عن نافع مأخوذ من إصدار مجمّع الملك فهد لطباعة المصحف الشريف (عبر قاعدة بيانات fawazahmed0/quran-api).
+  التلاوة الصوتية للقارئ المصري الشيخ محمود خليل الحصري برواية ورش عن نافع (عبر mp3quran.net). هذا التطبيق لخدمة كتاب الله، لأي ملاحظة يرجى التحقق من المصحف المطبوع.
+</footer>
+
+<div id="audioBar">
+  <button class="ab-close" id="audioClose" title="إغلاق">✕</button>
+  <span class="ab-title" id="audioTitle">تلاوة سورة</span>
+  <audio id="audioPlayer" controls autoplay></audio>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const WARSH_JSON = "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quranwarsh.min.json";
+  const JUZ_URL = (n) => `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quranwarsh/juzs/${n}.json`;
+  const AUDIO_URL = (n) => `https://server13.mp3quran.net/download/husr/Rewayat-Warsh-A-n-Nafi/${String(n).padStart(3,'0')}.mp3`;
+
+  const SURAHS = [
+    [1,"الفاتحة","مكية"],[2,"البقرة","مدنية"],[3,"آل عمران","مدنية"],[4,"النساء","مدنية"],
+    [5,"المائدة","مدنية"],[6,"الأنعام","مكية"],[7,"الأعراف","مكية"],[8,"الأنفال","مدنية"],
+    [9,"التوبة","مدنية"],[10,"يونس","مكية"],[11,"هود","مكية"],[12,"يوسف","مكية"],
+    [13,"الرعد","مدنية"],[14,"إبراهيم","مكية"],[15,"الحجر","مكية"],[16,"النحل","مكية"],
+    [17,"الإسراء","مكية"],[18,"الكهف","مكية"],[19,"مريم","مكية"],[20,"طه","مكية"],
+    [21,"الأنبياء","مكية"],[22,"الحج","مدنية"],[23,"المؤمنون","مكية"],[24,"النور","مدنية"],
+    [25,"الفرقان","مكية"],[26,"الشعراء","مكية"],[27,"النمل","مكية"],[28,"القصص","مكية"],
+    [29,"العنكبوت","مكية"],[30,"الروم","مكية"],[31,"لقمان","مكية"],[32,"السجدة","مكية"],
+    [33,"الأحزاب","مدنية"],[34,"سبأ","مكية"],[35,"فاطر","مكية"],[36,"يس","مكية"],
+    [37,"الصافات","مكية"],[38,"ص","مكية"],[39,"الزمر","مكية"],[40,"غافر","مكية"],
+    [41,"فصلت","مكية"],[42,"الشورى","مكية"],[43,"الزخرف","مكية"],[44,"الدخان","مكية"],
+    [45,"الجاثية","مكية"],[46,"الأحقاف","مكية"],[47,"محمد","مدنية"],[48,"الفتح","مدنية"],
+    [49,"الحجرات","مدنية"],[50,"ق","مكية"],[51,"الذاريات","مكية"],[52,"الطور","مكية"],
+    [53,"النجم","مكية"],[54,"القمر","مكية"],[55,"الرحمن","مكية"],[56,"الواقعة","مكية"],
+    [57,"الحديد","مدنية"],[58,"المجادلة","مدنية"],[59,"الحشر","مدنية"],[60,"الممتحنة","مدنية"],
+    [61,"الصف","مدنية"],[62,"الجمعة","مدنية"],[63,"المنافقون","مدنية"],[64,"التغابن","مدنية"],
+    [65,"الطلاق","مدنية"],[66,"التحريم","مدنية"],[67,"الملك","مكية"],[68,"القلم","مكية"],
+    [69,"الحاقة","مكية"],[70,"المعارج","مكية"],[71,"نوح","مكية"],[72,"الجن","مكية"],
+    [73,"المزمل","مكية"],[74,"المدثر","مكية"],[75,"القيامة","مكية"],[76,"الإنسان","مدنية"],
+    [77,"المرسلات","مكية"],[78,"النبأ","مكية"],[79,"النازعات","مكية"],[80,"عبس","مكية"],
+    [81,"التكوير","مكية"],[82,"الإنفطار","مكية"],[83,"المطففين","مكية"],[84,"الإنشقاق","مكية"],
+    [85,"البروج","مكية"],[86,"الطارق","مكية"],[87,"الأعلى","مكية"],[88,"الغاشية","مكية"],
+    [89,"الفجر","مكية"],[90,"البلد","مكية"],[91,"الشمس","مكية"],[92,"الليل","مكية"],
+    [93,"الضحى","مكية"],[94,"الشرح","مكية"],[95,"التين","مكية"],[96,"العلق","مكية"],
+    [97,"القدر","مكية"],[98,"البينة","مدنية"],[99,"الزلزلة","مدنية"],[100,"العاديات","مكية"],
+    [101,"القارعة","مكية"],[102,"التكاثر","مكية"],[103,"العصر","مكية"],[104,"الهمزة","مكية"],
+    [105,"الفيل","مكية"],[106,"قريش","مكية"],[107,"الماعون","مكية"],[108,"الكوثر","مكية"],
+    [109,"الكافرون","مكية"],[110,"النصر","مدنية"],[111,"المسد","مكية"],[112,"الإخلاص","مكية"],
+    [113,"الفلق","مكية"],[114,"الناس","مكية"]
+  ].map(([number,name,type])=>({number,name,type,count:0}));
+
+  let versesByChapter = {};   // {chapterNumber: [ {verse,text} ... ]}
+  let flatVerses = [];        // for search: {chapter, verse, text, norm}
+  let currentSurah = 1;
+  let audioCtx = { playing:false };
+
+  const readerEl = document.getElementById('reader');
+  const surahListEl = document.getElementById('surahListEl');
+  const juzListEl = document.getElementById('juzListEl');
+  const audioBar = document.getElementById('audioBar');
+  const audioPlayer = document.getElementById('audioPlayer');
+  const audioTitle = document.getElementById('audioTitle');
+
+  function normalize(str){
+    return str
+      .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u08F0-\u08FF]/g,'')
+      .replace(/[إأآٱا]/g,'ا')
+      .replace(/ى/g,'ي')
+      .replace(/ة/g,'ه')
+      .replace(/[ؤئ]/g,'ء')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  async function loadAll(){
+    try{
+      const res = await fetch(WARSH_JSON);
+      const data = await res.json();
+      const list = data.quran;
+      list.forEach(v=>{
+        if(!versesByChapter[v.chapter]) versesByChapter[v.chapter]=[];
+        versesByChapter[v.chapter].push({verse:v.verse, text:v.text});
+        flatVerses.push({chapter:v.chapter, verse:v.verse, text:v.text, norm:normalize(v.text)});
+      });
+      SURAHS.forEach(s=>{ s.count = (versesByChapter[s.number]||[]).length; });
+      buildSurahList();
+      buildJuzList();
+      renderSurah(1);
+    }catch(e){
+      readerEl.innerHTML = `<div class="placeholder">
+        <p>تعذّر تحميل نص المصحف. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.</p>
+      </div>`;
+      console.error(e);
+    }
+  }
+
+  function buildSurahList(filter){
+    filter = (filter||'').trim();
+    surahListEl.innerHTML = '';
+    SURAHS.forEach(s=>{
+      if(filter && !s.name.includes(filter) && !String(s.number).includes(filter)) return;
+      const div = document.createElement('div');
+      div.className = 'surah-item' + (s.number===currentSurah ? ' active':'');
+      div.innerHTML = `
+        <div class="s-num">${s.number}</div>
+        <div>
+          <div class="s-name">سورة ${s.name}</div>
+        </div>
+        <div class="s-meta">${s.type}<br>${s.count||''} آية</div>`;
+      div.addEventListener('click', ()=> renderSurah(s.number));
+      surahListEl.appendChild(div);
+    });
+    if(surahListEl.children.length===0){
+      surahListEl.innerHTML = '<div class="search-empty">لا توجد نتائج مطابقة</div>';
+    }
+  }
+
+  function buildJuzList(){
+    juzListEl.innerHTML='';
+    for(let i=1;i<=30;i++){
+      const div=document.createElement('div');
+      div.className='juz-item';
+      div.innerHTML = `<div class="j-badge">${i}</div><div class="j-label">الجزء ${arabicOrdinal(i)}</div>`;
+      div.addEventListener('click', ()=> renderJuz(i, div));
+      juzListEl.appendChild(div);
+    }
+  }
+
+  const ordinals = ['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر',
+    'الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون',
+    'الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون'];
+  function arabicOrdinal(n){ return ordinals[n-1] || n; }
+
+  function ayahNumeral(n){
+    // Arabic-indic digits for a traditional feel
+    const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    return String(n).split('').map(d=>map[+d]||d).join('');
+  }
+
+  function renderSurah(num, highlightAyah){
+    currentSurah = num;
+    document.querySelectorAll('.surah-item').forEach(el=>el.classList.remove('active'));
+    buildSurahList(document.getElementById('surahFilter').value);
+    const s = SURAHS.find(x=>x.number===num);
+    const verses = versesByChapter[num] || [];
+    const showBismillah = num !== 1 && num !== 9;
+
+    let ayatHtml = verses.map(v=>{
+      const hl = (highlightAyah===v.verse) ? ' hilite' : '';
+      return `<span class="ayah${hl}" id="ayah-${num}-${v.verse}">${v.text} <span class="ayah-num">${ayahNumeral(v.verse)}</span></span> `;
+    }).join('');
+
+    readerEl.innerHTML = `
+      <div class="surah-card">
+        <div class="surah-head">
+          <button class="play-fab" id="playBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            استمع (الحصري)
+          </button>
+          <h2>سورة ${s.name}</h2>
+          <div class="sub"><span>${s.type}</span><span>${s.count} آية</span><span>رقم ${s.number}</span></div>
+        </div>
+        ${showBismillah ? `<div class="bismillah">بِسْمِ اِ۬للَّهِ اِ۬لرَّحْمَٰنِ اِ۬لرَّحِيمِ</div>` : ""}
+        <div class="ayat-block" id="ayatBlock">${ayatHtml}</div>
+        <div class="surah-nav">
+          <button class="nav-btn" id="prevSurah" ${num<=1?'disabled':''}>السورة السابقة ‹</button>
+          <button class="nav-btn" id="nextSurah" ${num>=114?'disabled':''}>› السورة التالية</button>
+        </div>
+      </div>`;
+
+    document.getElementById('playBtn').addEventListener('click', ()=> playSurah(num, s.name));
+    const prevBtn = document.getElementById('prevSurah');
+    const nextBtn = document.getElementById('nextSurah');
+    if(prevBtn) prevBtn.addEventListener('click', ()=>{ if(num>1) renderSurah(num-1); window.scrollTo({top:0,behavior:'smooth'}); });
+    if(nextBtn) nextBtn.addEventListener('click', ()=>{ if(num<114) renderSurah(num+1); window.scrollTo({top:0,behavior:'smooth'}); });
+
+    if(highlightAyah){
+      requestAnimationFrame(()=>{
+        const el = document.getElementById(`ayah-${num}-${highlightAyah}`);
+        if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    }
+  }
+
+  async function renderJuz(n, clickedEl){
+    document.querySelectorAll('.juz-item').forEach(el=>el.classList.remove('active'));
+    if(clickedEl) clickedEl.classList.add('active');
+    readerEl.innerHTML = `<div class="placeholder"><div class="spinner"></div><p>جارٍ تحميل الجزء ${arabicOrdinal(n)}…</p></div>`;
+    try{
+      const res = await fetch(JUZ_URL(n));
+      const data = await res.json();
+      const verses = data.juzs || data.quran || data;
+      let html = `<div class="surah-card"><div class="surah-head"><h2>الجزء ${arabicOrdinal(n)}</h2><div class="sub"><span>رواية ورش عن نافع</span></div></div><div class="juz-list-inner">`;
+      let lastChapter = null;
+      verses.forEach(v=>{
+        if(v.chapter !== lastChapter){
+          const s = SURAHS.find(x=>x.number===v.chapter);
+          html += `<div class="surah-mini-head">سورة ${s?s.name:v.chapter}</div>`;
+          if(v.chapter!==1 && v.chapter!==9 && v.verse===1){
+            html += `<div class="bismillah">بِسْمِ اِ۬للَّهِ اِ۬لرَّحْمَٰنِ اِ۬لرَّحِيمِ</div>`;
+          }
+          lastChapter = v.chapter;
+        }
+        html += `<div class="ayat-block" style="padding-top:0;padding-bottom:0;display:inline">
+          <span class="ayah" id="ayah-${v.chapter}-${v.verse}">${v.text} <span class="ayah-num">${ayahNumeral(v.verse)}</span></span> </div>`;
+      });
+      html += `</div></div>`;
+      readerEl.innerHTML = html;
+    }catch(e){
+      readerEl.innerHTML = `<div class="placeholder"><p>تعذّر تحميل هذا الجزء. حاول مرة أخرى.</p></div>`;
+    }
+  }
+
+  function playSurah(num, name){
+    audioPlayer.src = AUDIO_URL(num);
+    audioTitle.textContent = `سورة ${name} — الشيخ محمود خليل الحصري (ورش عن نافع)`;
+    audioBar.classList.add('show');
+    audioPlayer.play().catch(()=>{});
+  }
+  document.getElementById('audioClose').addEventListener('click', ()=>{
+    audioPlayer.pause();
+    audioBar.classList.remove('show');
+  });
+
+  // tabs
+  const tabSurah = document.getElementById('tabSurah');
+  const tabJuz = document.getElementById('tabJuz');
+  tabSurah.addEventListener('click', ()=>{
+    tabSurah.classList.add('active'); tabJuz.classList.remove('active');
+    surahListEl.hidden=false; juzListEl.hidden=true;
+    document.getElementById('surahFilter').placeholder = 'ابحث عن اسم سورة أو رقمها…';
+  });
+  tabJuz.addEventListener('click', ()=>{
+    tabJuz.classList.add('active'); tabSurah.classList.remove('active');
+    juzListEl.hidden=false; surahListEl.hidden=true;
+  });
+
+  document.getElementById('surahFilter').addEventListener('input', (e)=>{
+    if(!surahListEl.hidden) buildSurahList(e.target.value);
+  });
+
+  // font controls
+  const fontSelect = document.getElementById('fontSelect');
+  fontSelect.addEventListener('change', ()=>{
+    document.documentElement.style.setProperty('--reader-font', fontSelect.value);
+  });
+  let fontSize = 30;
+  document.getElementById('incFont').addEventListener('click', ()=>{
+    fontSize = Math.min(fontSize+2, 46);
+    document.documentElement.style.setProperty('--reader-size', fontSize+'px');
+  });
+  document.getElementById('decFont').addEventListener('click', ()=>{
+    fontSize = Math.max(fontSize-2, 18);
+    document.documentElement.style.setProperty('--reader-size', fontSize+'px');
+  });
+
+  // search across whole Quran (Warsh text), diacritic-insensitive
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+  let searchTimer = null;
+  searchInput.addEventListener('input', ()=>{
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if(q.length < 2){ searchResults.classList.remove('show'); return; }
+    searchTimer = setTimeout(()=>{
+      const nq = normalize(q);
+      const matches = [];
+      for(let i=0;i<flatVerses.length && matches.length<40;i++){
+        if(flatVerses[i].norm.includes(nq)) matches.push(flatVerses[i]);
+      }
+      renderSearchResults(matches, q);
+    }, 180);
+  });
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('.search-wrap')) searchResults.classList.remove('show');
+  });
+
+  function renderSearchResults(matches, q){
+    if(matches.length===0){
+      searchResults.innerHTML = `<div class="search-empty">لا توجد نتائج لـ «${q}»</div>`;
+    } else {
+      searchResults.innerHTML = matches.map(m=>{
+        const s = SURAHS.find(x=>x.number===m.chapter);
+        return `<div class="sr-item" data-c="${m.chapter}" data-v="${m.verse}">
+          ${m.text}
+          <div class="sr-meta">سورة ${s?s.name:m.chapter} — الآية ${m.verse}</div>
+        </div>`;
+      }).join('');
+      searchResults.querySelectorAll('.sr-item').forEach(el=>{
+        el.addEventListener('click', ()=>{
+          const c = +el.dataset.c, v = +el.dataset.v;
+          tabSurah.click();
+          renderSurah(c, v);
+          searchResults.classList.remove('show');
+          searchInput.value='';
+          window.scrollTo({top:0, behavior:'smooth'});
+        });
+      });
+    }
+    searchResults.classList.add('show');
+  }
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
