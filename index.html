@@ -489,6 +489,7 @@
   "use strict";
 
   const WARSH_JSON = "https://api.quranpedia.net/v1/mushafs/4";
+  const CORS_PROXY = "https://api.allorigins.win/raw?url=";
   const AUDIO_URL = function(n) { return "https://server13.mp3quran.net/download/husr/Rewayat-Warsh-A-n-Nafi/" + String(n).padStart(3,'0') + ".mp3"; };
 
   const SURAHS = [
@@ -571,9 +572,21 @@
 
   let juzVerses = {};
 
-  function loadJSON(url, callback){
+  function loadJSON(url, callback, useProxy){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
+    var finalUrl = useProxy ? (CORS_PROXY + encodeURIComponent(url)) : url;
+    
+    xhr.open('GET', finalUrl, true);
+    xhr.timeout = 15000;
+    
+    xhr.ontimeout = function(){
+      if(!useProxy){
+        loadJSON(url, callback, true);
+      }else{
+        callback(new Error('Timeout - تعذر الاتصال بالخادم'), null);
+      }
+    };
+    
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4){
         if(xhr.status === 200){
@@ -581,16 +594,30 @@
             var data = JSON.parse(xhr.responseText);
             callback(null, data);
           }catch(e){
-            callback(e, null);
+            if(!useProxy){
+              loadJSON(url, callback, true);
+            }else{
+              callback(new Error('خطأ في تحليل البيانات'), null);
+            }
           }
         }else{
-          callback(new Error('HTTP ' + xhr.status), null);
+          if(!useProxy && (xhr.status === 0 || xhr.status >= 400)){
+            loadJSON(url, callback, true);
+          }else{
+            callback(new Error('HTTP ' + xhr.status), null);
+          }
         }
       }
     };
+    
     xhr.onerror = function(){
-      callback(new Error('Network error'), null);
+      if(!useProxy){
+        loadJSON(url, callback, true);
+      }else{
+        callback(new Error('خطأ في الشبكة'), null);
+      }
     };
+    
     xhr.send();
   }
 
@@ -633,7 +660,7 @@
           '</div>';
         console.error(e);
       }
-    });
+    }, false);
   }
 
   function buildSurahList(filter){
