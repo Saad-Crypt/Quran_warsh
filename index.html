@@ -306,13 +306,10 @@
   @media (max-width:600px){ .ayat-block{padding:8px 16px 26px;} }
   .ayah{transition:background .3s;}
   .ayah.hilite{background:#f3dfa6aa; border-radius:6px;}
-  .ayah-num{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:1.05em; height:1.05em; margin:0 4px;
-    font-family:'Cairo',sans-serif; font-size:.34em; font-weight:800;
-    color:var(--emerald); border:1.4px solid var(--gold); border-radius:50%;
-    transform:translateY(-2px);
-    padding:.6em;
+  .ayah-badge{
+    display:inline-block; vertical-align:-0.18em;
+    width:1.15em; height:1.15em; margin:0 3px;
+    filter: drop-shadow(0 1px 1px rgba(90,65,20,.25));
   }
   .surah-nav{
     display:flex; justify-content:space-between; align-items:center;
@@ -452,6 +449,15 @@
   <div class="mesh-rule"></div>
 </header>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="ayahGoldGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#f6e2a8"/>
+      <stop offset="100%" stop-color="#a97c34"/>
+    </radialGradient>
+  </defs>
+</svg>
+
 <div id="dropdownBackdrop"></div>
 
 <div class="layout">
@@ -472,7 +478,7 @@
 </div>
 
 <footer class="credits">
-  النص القرآني برواية ورش عن نافع، والخط العثماني الرسمي، مأخوذان من قاعدة بيانات Quranpedia، نسخة موافقة لمطبوعة مجمّع الملك فهد لطباعة المصحف الشريف.
+  النص القرآني برواية ورش عن نافع مأخوذ من إصدار مجمّع الملك فهد لطباعة المصحف الشريف (عبر قاعدة بيانات fawazahmed0/quran-api)، مع تصحيح آلي لعلامة الألف الصغيرة عند الحاجة. الخط العثماني المخصّص لرواية ورش من إصدار Quranpedia.
   التلاوة الصوتية للقارئ المصري الشيخ محمود خليل الحصري برواية ورش عن نافع (عبر mp3quran.net). هذا التطبيق لخدمة كتاب الله، ويسعدنا تصحيح أي ملاحظة حول دقة النص.
 </footer>
 
@@ -486,7 +492,8 @@
 (function(){
   "use strict";
 
-  const WARSH_JSON = "https://api.quranpedia.net/v1/mushafs/4";
+  const WARSH_JSON = "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quranwarsh.min.json";
+  const JUZ_URL = (n) => `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quranwarsh/juzs/${n}.json`;
   const AUDIO_URL = (n) => `https://server13.mp3quran.net/download/husr/Rewayat-Warsh-A-n-Nafi/${String(n).padStart(3,'0')}.mp3`;
 
   const SURAHS = [
@@ -572,26 +579,16 @@
     return out;
   }
 
-  let juzVerses = {}; // {juzNumber: [{chapter,verse,text}, ...]} built directly from source metadata
-
   async function loadAll(){
     try{
       const res = await fetch(WARSH_JSON);
       const data = await res.json();
-      (data.surahs || []).forEach(surah=>{
-        (surah.ayahs || []).forEach(a=>{
-          const chapter = parseInt(a.surah, 10);
-          const verse = a.number;
-          const text = fixRasm(cleanText(a.text));
-          if(!versesByChapter[chapter]) versesByChapter[chapter]=[];
-          versesByChapter[chapter].push({verse, text});
-          flatVerses.push({chapter, verse, text, norm:normalize(text)});
-          const juzNum = a.juz;
-          if(juzNum){
-            if(!juzVerses[juzNum]) juzVerses[juzNum]=[];
-            juzVerses[juzNum].push({chapter, verse, text});
-          }
-        });
+      const list = data.quran;
+      list.forEach(v=>{
+        const text = fixRasm(cleanText(v.text));
+        if(!versesByChapter[v.chapter]) versesByChapter[v.chapter]=[];
+        versesByChapter[v.chapter].push({verse:v.verse, text});
+        flatVerses.push({chapter:v.chapter, verse:v.verse, text, norm:normalize(text)});
       });
       SURAHS.forEach(s=>{ s.count = (versesByChapter[s.number]||[]).length; });
       buildSurahList();
@@ -600,6 +597,8 @@
     }catch(e){
       readerEl.innerHTML = `<div class="placeholder">
         <p>تعذّر تحميل نص المصحف. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.</p>
+        <p style="font-size:11px; color:#9a8a6a; direction:ltr; unicode-bidi:plain-text;">${(e && e.message) ? e.message : e}</p>
+        <button class="nav-btn" onclick="location.reload()">إعادة المحاولة</button>
       </div>`;
       console.error(e);
     }
@@ -648,6 +647,22 @@
     return String(n).split('').map(d=>map[+d]||d).join('');
   }
 
+  function ayahBadge(n){
+    const num = ayahNumeral(n);
+    const fontSize = num.length >= 3 ? 12 : (num.length === 2 ? 14.5 : 17);
+    const petals = Array.from({length:8}).map((_,i)=>{
+      const ang = i * 45 * Math.PI/180;
+      const cx = (20 + 12.5*Math.cos(ang)).toFixed(2);
+      const cy = (20 + 12.5*Math.sin(ang)).toFixed(2);
+      return `<circle cx="${cx}" cy="${cy}" r="7.4"/>`;
+    }).join('');
+    return `<svg class="ayah-badge" viewBox="0 0 40 40" role="img" aria-label="آية ${num}">
+      <g fill="url(#ayahGoldGrad)">${petals}</g>
+      <circle cx="20" cy="20" r="11.8" fill="#fffdf6" stroke="#a97c34" stroke-width="1.1"/>
+      <text x="20" y="21" text-anchor="middle" dominant-baseline="central" font-family="Cairo, sans-serif" font-weight="800" font-size="${fontSize}" fill="#0f3d34">${num}</text>
+    </svg>`;
+  }
+
   function renderSurah(num, highlightAyah){
     currentSurah = num;
     document.querySelectorAll('.surah-item').forEach(el=>el.classList.remove('active'));
@@ -658,7 +673,7 @@
 
     let ayatHtml = verses.map(v=>{
       const hl = (highlightAyah===v.verse) ? ' hilite' : '';
-      return `<span class="ayah${hl}" id="ayah-${num}-${v.verse}">${v.text} <span class="ayah-num">${ayahNumeral(v.verse)}</span></span> `;
+      return `<span class="ayah${hl}" id="ayah-${num}-${v.verse}">${v.text} ${ayahBadge(v.verse)}</span> `;
     }).join('');
 
     readerEl.innerHTML = `
@@ -698,7 +713,9 @@
     if(clickedEl) clickedEl.classList.add('active');
     readerEl.innerHTML = `<div class="placeholder"><div class="spinner"></div><p>جارٍ تحميل الجزء ${arabicOrdinal(n)}…</p></div>`;
     try{
-      const verses = juzVerses[n] || [];
+      const res = await fetch(JUZ_URL(n));
+      const data = await res.json();
+      const verses = data.juzs || data.quran || data;
       let html = `<div class="surah-card"><div class="surah-head"><h2>الجزء ${arabicOrdinal(n)}</h2><div class="sub"><span>رواية ورش عن نافع</span></div></div><div class="juz-list-inner">`;
       let lastChapter = null;
       verses.forEach(v=>{
@@ -710,8 +727,10 @@
           }
           lastChapter = v.chapter;
         }
+        const local = (versesByChapter[v.chapter]||[]).find(x=>x.verse===v.verse);
+        const text = local ? local.text : fixRasm(cleanText(v.text));
         html += `<div class="ayat-block" style="padding-top:0;padding-bottom:0;display:inline">
-          <span class="ayah" id="ayah-${v.chapter}-${v.verse}">${v.text} <span class="ayah-num">${ayahNumeral(v.verse)}</span></span> </div>`;
+          <span class="ayah" id="ayah-${v.chapter}-${v.verse}">${text} ${ayahBadge(v.verse)}</span> </div>`;
       });
       html += `</div></div>`;
       readerEl.innerHTML = html;
