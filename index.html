@@ -556,10 +556,11 @@
   }
 
   // The source data (like the official print) writes some alif-maqsura words
-  // (على، إلى، حتى...) with ي + a small "dagger alif" mark on top — genuine
-  // classical mus-haf spelling. But the mark is dropped whenever the next word
-  // starts with ا, leaving a bare ي that's easy to misread as the letter ya.
-  // This restores the mark consistently so the intended sound is always shown.
+  // (على، إلى، حتى...) with ي — sometimes with a tiny "dagger alif" mark on top
+  // (genuine classical mus-haf spelling), sometimes without it (a data gap).
+  // Relying on that small combining mark isn't reliable across fonts/WebViews,
+  // so instead we normalize these words to the standard, universally-rendered
+  // ALEF MAKSURA letter (ى) so they always display unambiguously.
   const D = '[\\u064B-\\u065F\\u0670]*'; // any diacritics that may sit between letters
   const AFTER = '(?=[\\s\\u06d6-\\u06ed]|$)'; // word boundary (space, Quranic pause mark, or end)
   const RASM_STEMS = [
@@ -571,11 +572,11 @@
     ['\u0644','\u062f'], // لدى  (lam, dal)
     ['\u0623','\u0646'], // أنى  (alef-hamza-above, nun)
     ['\u0628','\u0644'], // بلى  (ba, lam)
-  ].map(([c1,c2])=> new RegExp(c1+D+c2+D+'\u064a(?!\u0670)'+AFTER, 'g'));
+  ].map(([c1,c2])=> new RegExp(c1+D+c2+D+'\u064a\u0670?'+AFTER, 'g'));
 
   function fixRasm(text){
     let out = text;
-    RASM_STEMS.forEach(re=>{ out = out.replace(re, m => m + '\u0670'); });
+    RASM_STEMS.forEach(re=>{ out = out.replace(re, m => m.replace(/\u064a\u0670?$/, '\u0649')); });
     return out;
   }
 
